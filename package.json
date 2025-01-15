@@ -1,0 +1,29 @@
+{
+  "name": "ozo.js",
+  "version": "0.0.1-a2",
+  "description": "making discord bot for easier",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "keywords": [
+    "discord",
+    "aoi.js",
+    "discord bot",
+    "discord bot maker",
+    "bot",
+    "chat",
+    "api",
+    "wrapper",
+    "easy"
+  ],
+  "author": "fightfarewellfearless",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "debug": "^4.3.4",
+    "discord.js": "^14.15.3",
+    "meatdb": "^2.1.0",
+    "os": "0.1.2"
+  }
+}

@@ -1,0 +1,23 @@
+*.replit
+*.replit.nix
+*bot.js 
+
+# database 
+database/
+
+# Ignore config files
+.config/
+
+# node_module
+node_modules/
+
+
+# upm
+.upm/
+*store.json
+
+# ingnore cache
+.cache/
+
+# Ignore temporary files
+tmp/
