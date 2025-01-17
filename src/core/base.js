@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits, Partials, ActivityType } = require("discord.js");
+const { DefaultWebSocketManagerOptions } = require("@discordjs/ws");
 const newMap = require("./cache/cache.js");
 const Db = require("meatdb");
 const fs = require("fs");
@@ -20,17 +21,32 @@ class Bot {
         this.variable = new newMap();
         this.status = new newMap();
         this.events = opt.events || [];
+        this.mobilePlatform = opt.mobilePlatform || false; // Enable mobile platform if true
+        this.identifyProperties = opt.identifyProperties || {}; // Custom identifyProperties option
         this.#start();
 
-        if (typeof this.prefix !== "string") throw new Error("prefix must be a string");
+        if (typeof this.prefix !== "string") throw new Error("Prefix must be a string");
         if (this.autoUpdate) checkForUpdates(require("../package.json").name);
     }
 
     #start() {
-        const client = new Client({
+        const clientOptions = {
             intents: this.opt.intents.map((intent) => GatewayIntentBits[intent]),
             partials: this.opt.partials.map((partial) => Partials[partial]),
-        });
+        };
+
+        // Add custom WebSocket options for mobilePlatform
+        if (this.mobilePlatform) {
+            clientOptions.ws = new DefaultWebSocketManagerOptions({
+                identifyProperties: {
+                    os: this.identifyProperties.os || "unknown", // Default OS
+                    browser: this.identifyProperties.browser || "Discord", // Default Browser
+                    device: this.identifyProperties.device || "Desktop", // Default Device
+                },
+            });
+        }
+
+        const client = new Client(clientOptions);
         this.client = client;
         this.client.simpler = this;
 
