@@ -29,26 +29,56 @@ class ClientBot extends Bot {
 
     onShardReady() {
         this.client.on("shardReady", async (id, guilds) => {
-            await require("./handler/command/shardReady.js")(id, this);
+            await require("../events/shards/shardReady.js")(id, this);
         });
     }
 
     onShardDisconnect() {
         this.client.on("shardDisconnect", async (event, id) => {
-            await require("./handler/command/shardDisconnect.js")(event, id, this);
+            await require("../events/shards/shardDisconnect.js")(event, id, this);
         });
     }
 
     onShardReconnecting() {
         this.client.on("shardReconnecting", async (id) => {
-            await require("./handler/command/shardReconnecting.js")(id, this);
+            await require("../events/shards/shardReconnecting.js")(id, this);
+        });
+    }
+
+    onBotJoin() {
+        this.client.on("guildCreate", async (guild) => {
+            await require("../events/guild/botJoin.js")(guild, this);
+        });
+    }
+
+    onBotLeave() {
+        this.client.on("guildDelete", async (guild) => {
+            await require("../events/guild/botLeave.js")(guild, this);
         });
     }
 
     onMessage() {
         this.client.on("messageCreate", async (msg) => {
-            await require("./handler/command/default.js")(msg, this);
-            await require("./handler/command/always.js")(msg, this);
+            await require("../events/message/default.js")(msg, this);
+            await require("../events/message/always.js")(msg, this);
+        });
+    }
+
+    onMemberJoin() {
+        this.client.on("guildMemberAdd", async (member) => {
+            await require("../events/guild/memberJoin.js")(member, this);
+        });
+    }
+
+    onMemberLeave() {
+        this.client.on("guildMemberRemove", async (member) => {
+            await require("../events/guild/memberLeave.js")(member, this);
+        });
+    }
+
+    onReactionAdd() {
+        this.client.on("messageReactionAdd", async (reaction, user) => {
+            await require("../events/message/reactionAdd.js")(reaction, user, this);
         });
     }
 
