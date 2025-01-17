@@ -1,6 +1,6 @@
 const { Client, GatewayIntentBits, Partials, ActivityType } = require("discord.js");
 const { DefaultWebSocketManagerOptions } = require("@discordjs/ws");
-const newMap = require("./cache/cache.js");
+const newMap = require("../utils/cache.js");
 const Db = require("meatdb");
 const fs = require("fs");
 const path = require("path");
