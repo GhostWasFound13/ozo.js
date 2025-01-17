@@ -4,8 +4,8 @@ const newMap = require("../utils/cache.js");
 const Db = require("meatdb");
 const fs = require("fs");
 const path = require("path");
-const { checkForUpdates } = require("./utils/autoUpdate.js");
-const api = require("./handler/api.js");
+const { checkForUpdates } = require("../utils/autoUpdate.js");
+const api = require("../handler/api.js");
 
 class Bot {
     constructor(opt) {
@@ -14,8 +14,8 @@ class Bot {
         this.db = new Db({
             path: opt?.database?.path,
         });
-        this.cmd = require("./handler/commandType.js");
-        this.funcParser = require("./funcs/parser");
+        this.cmd = require("../handler/commandType.js");
+        this.funcParser = require("../funcs/parser");
         this.autoUpdate = opt.autoUpdate || false;
         this.functions = new newMap();
         this.variable = new newMap();
