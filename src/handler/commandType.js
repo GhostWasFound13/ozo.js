@@ -1,4 +1,4 @@
-const newMap = require("../cache/cache.js")
+const newMap = require("../utils/cache.js")
 module.exports = {
     shardReady: new Map(),
     shardDisconnect: new Map(),
