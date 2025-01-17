@@ -1,11 +1,10 @@
-const api = require("./handler/api.js");
-const version = require("../package.json").version;
-const { checkForUpdates } = require("./utils/autoUpdate.js");
 const { Client, GatewayIntentBits, Partials, ActivityType } = require("discord.js");
 const newMap = require("./cache/cache.js");
 const Db = require("meatdb");
 const fs = require("fs");
 const path = require("path");
+const { checkForUpdates } = require("./utils/autoUpdate.js");
+const api = require("./handler/api.js");
 
 class Bot {
     constructor(opt) {
@@ -16,7 +15,7 @@ class Bot {
         });
         this.cmd = require("./handler/commandType.js");
         this.funcParser = require("./funcs/parser");
-        this.autoUpdate = opt.autoUpdate || false; // Auto-update option
+        this.autoUpdate = opt.autoUpdate || false;
         this.functions = new newMap();
         this.variable = new newMap();
         this.status = new newMap();
@@ -24,10 +23,9 @@ class Bot {
         this.#start();
 
         if (typeof this.prefix !== "string") throw new Error("prefix must be a string");
-    if (this.autoUpdate) checkForUpdates(require("../package.json").name); // Auto-update check
+        if (this.autoUpdate) checkForUpdates(require("../package.json").name);
     }
 
-    // Start client
     #start() {
         const client = new Client({
             intents: this.opt.intents.map((intent) => GatewayIntentBits[intent]),
@@ -36,16 +34,12 @@ class Bot {
         this.client = client;
         this.client.simpler = this;
 
-   
-
-        // Load events dynamically
         this.events.forEach((event) => {
             if (typeof this[`on${event}`] === "function") {
                 this[`on${event}`]();
             }
         });
 
-        // Load functions
         const dirFolder = path.join(__dirname, "funcs", "functions");
         const folders = fs.readdirSync(dirFolder);
         folders.forEach((x) => {
@@ -56,7 +50,6 @@ class Bot {
             });
         });
 
-        // Presence manager
         this.client.on("ready", async () => {
             while (this.status.size > 0) {
                 for (let [k, v] of this.status) {
@@ -73,71 +66,8 @@ class Bot {
                 }
             }
         });
-
-        // Shard events
-        if (this.events.includes("ShardReady")) this.onShardReady();
-        if (this.events.includes("ShardDisconnect")) this.onShardDisconnect();
-        if (this.events.includes("ShardReconnecting")) this.onShardReconnecting();
     }
 
-    // Events
-    onBotJoin() {
-        this.client.on("guildCreate", async (guild) => {
-            await require("./handler/command/botJoin.js")(guild, this);
-        });
-    }
-
-    onBotLeave() {
-        this.client.on("guildDelete", async (guild) => {
-            await require("./handler/command/botLeave.js")(guild, this);
-        });
-    }
-
-    onMessage() {
-        this.client.on("messageCreate", async (msg) => {
-            await require("./handler/command/default.js")(msg, this);
-            await require("./handler/command/always.js")(msg, this);
-        });
-    }
-
-    onMemberJoin() {
-        this.client.on("guildMemberAdd", async (member) => {
-            await require("./handler/command/memberJoin.js")(member, this);
-        });
-    }
-
-    onMemberLeave() {
-        this.client.on("guildMemberRemove", async (member) => {
-            await require("./handler/command/memberLeave.js")(member, this);
-        });
-    }
-
-    onReactionAdd() {
-        this.client.on("messageReactionAdd", async (reaction, user) => {
-            await require("./handler/command/reactionAdd.js")(reaction, user, this);
-        });
-    }
-
-    // Shard events
-    onShardReady() {
-        this.client.on("shardReady", async (id, guilds) => {
-            await require("./handler/command/shardReady.js")(id, this);
-        });
-    }
-
-    onShardDisconnect() {
-        this.client.on("shardDisconnect", async (event, id) => {
-            await require("./handler/command/shardDisconnect.js")(event, id, this);
-        });
-    }
-
-    onShardReconnecting() {
-        this.client.on("shardReconnecting", async (id) => {
-            await require("./handler/command/shardReconnecting.js")(id, this);
-        });
-    }
-
-    // Commands
     botJoinCommand(opt) {
         this.cmd.botJoin.set(this.cmd.botJoin.size, opt);
     }
@@ -200,20 +130,11 @@ class Bot {
         }
     }
 
-    async login(token) {
-        await this.client.login(token);
-        this.client.prefix = this.prefix;
-        console.log(`Initialized on ${this.client.user.tag}\nMade with: discord.js v14\nv${version}\nJoin official support server: https://discord.gg/DW4CCH236j`);
-        api(this);
-    }
-
-    // Custom Function
     createCustomFunction(opt) {
         if (!opt?.name || !opt?.name?.includes("$") || typeof opt?.code !== "function") throw new Error("Invalid Name or Code");
         this.functions.set(opt.name.toLowerCase(), opt.code);
     }
 
-    // Add presence
     addPresence(...options) {
         if (!options) throw new Error("Invalid presence options provided!");
         options.forEach((s) => {
