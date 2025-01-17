@@ -1,8 +1,27 @@
+const createConsoleMessage = require("./createConsoleMessage");
+
 if (parseInt(process.version.replace("v", "")) < 16) {
-    console.warn(
-        "\x1b[31mWarning!\x1b[0m\n\x1b[33mOzo.js requires Node.js version 16 or higher to work. Your current Node.js version:",
-        process.version,
-        "Please update your Node.js version and try again.\x1b[0m"
+    createConsoleMessage(
+        [
+            {
+                text: "Warning!",
+                textColor: "red",
+                type: "error"
+            },
+            {
+                text: `Ozo.js requires Node.js version 16 or higher to work. Your current Node.js version: ${process.version}`,
+                textColor: "yellow"
+            },
+            {
+                text: "Please update your Node.js version and try again.",
+                textColor: "yellow"
+            }
+        ],
+        "white",
+        {
+            text: "Ozo.js Startup Error",
+            textColor: "cyan"
+        }
     );
     process.exit();
 } else {
@@ -14,4 +33,3 @@ if (parseInt(process.version.replace("v", "")) < 16) {
         ClientBot, // Export only the ClientBot class, as it includes Bot's functionality
         CommandHandler,
     };
-}
