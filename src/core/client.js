@@ -1,6 +1,7 @@
 const { Bot } = require("./base.js");
-const { Client } = require("discord.js");
+const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const version = require("../../package.json").version;
+const createConsoleMessage = require("../utils/createConsoleMessage"); // Import createConsoleMessage function
 
 class ClientBot extends Bot {
     constructor(opt) {
@@ -14,14 +15,12 @@ class ClientBot extends Bot {
     }
 
     #start() {
-        // Load events dynamically
         this.events.forEach((event) => {
             if (typeof this[`on${event}`] === "function") {
                 this[`on${event}`]();
             }
         });
 
-        // Shard events
         if (this.events.includes("ShardReady")) this.onShardReady();
         if (this.events.includes("ShardDisconnect")) this.onShardDisconnect();
         if (this.events.includes("ShardReconnecting")) this.onShardReconnecting();
@@ -85,7 +84,31 @@ class ClientBot extends Bot {
     async login(token) {
         await this.client.login(token);
         this.client.prefix = this.prefix;
-        console.log(`Initialized on ${this.client.user.tag}\nMade with: discord.js v14\nv${version}\nJoin official support server: https://discord.gg/DW4CCH236j`);
+        createConsoleMessage(
+            [
+                {
+                    text: `Initialized on ${this.client.user.tag}`,
+                    textColor: "green"
+                },
+                {
+                    text: "Made with: discord.js v14",
+                    textColor: "blue"
+                },
+                {
+                    text: `v${version}`,
+                    textColor: "yellow"
+                },
+                {
+                    text: "Join the official support server: https://discord.gg/DW4CCH236j",
+                    textColor: "cyan"
+                }
+            ],
+            "white",
+            {
+                text: "Ozo.js Bot Startup",
+                textColor: "magenta"
+            }
+        );
     }
 }
 
