@@ -1,5 +1,5 @@
-# bds.js get started
-bds.js is package that simplified your discord bot coding without any programming knowledge (but it's recommended to do)
+# ozo.js get started
+ozo.js is package that simplified your discord bot coding without any programming knowledge (but it's recommended to do)
 fork version of easier-discord.js but this time i will try to revamp this:
 update to djs v14
 
@@ -80,16 +80,6 @@ module.exports = {
     `
 }
 ```
-
-# changelog v0.0.1-a1
-- removed debug.ez
-- update index.js
-- adding userID, userPerms, isBotVerify,authorBanner, authorBannerColor, other thing
-- update userTag, authorAvatar
-- update functions.js with nested parsing
-- update always.js
-- adding shardEvent
-- adding toUpperCase functions 
 
 
 
