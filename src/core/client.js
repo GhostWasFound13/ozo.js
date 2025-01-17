@@ -1,7 +1,6 @@
 const { Bot } = require("./base.js");
 const { Client } = require("discord.js");
-const api = require("./handler/api.js");
-const version = require("../package.json").version;
+const version = require("../../package.json").version;
 
 class ClientBot extends Bot {
     constructor(opt) {
@@ -57,7 +56,6 @@ class ClientBot extends Bot {
         await this.client.login(token);
         this.client.prefix = this.prefix;
         console.log(`Initialized on ${this.client.user.tag}\nMade with: discord.js v14\nv${version}\nJoin official support server: https://discord.gg/DW4CCH236j`);
-        api(this);
     }
 }
 
