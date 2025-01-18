@@ -80,6 +80,28 @@ class ClientBot extends Bot {
             await require("../events/message/reactionAdd.js")(reaction, user, this);
         });
     }
+    onReactionRemove() {
+    this.client.on("messageReactionRemove", async (reaction, user) => {
+        await require("../events/message/reactionDelete.js")(reaction, user, this);
+    });
+    }
+    onChannelDelete() {
+    this.client.on("channelDelete", async (channel) => {
+        await require("../events/channel/channelDelete.js")(channel, this);
+    });
+}
+
+   onChannelUpdate() {
+    this.client.on("channelUpdate", async (oldChannel, newChannel) => {
+        await require("../events/channel/channelUpdate.js")(oldChannel, newChannel, this);
+    });
+}
+
+  onChannelCreate() {
+    this.client.on("channelCreate", async (channel) => {
+        await require("../events/channel/channelCreate.js")(channel, this);
+    });
+}
 
     async login(token) {
         await this.client.login(token);
