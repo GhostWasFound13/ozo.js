@@ -133,6 +133,19 @@ class Bot {
     reactionAddCommand(opt) {
         this.cmd.reactionAdd.set(this.cmd.reactionAdd.size, opt);
     }
+    reactionDeleteCommand(opt) {
+        this.cmd.reactionDelete.set(this.cmd.reactionAdd.size, opt);
+    }
+    channelCreateCommand(opt) {
+        this.cmd.channelCreate.set(this.cmd.reactionAdd.size, opt);
+    }
+    channelUpdateCommand(opt) {
+        this.cmd.channelUpdate.set(this.cmd.reactionAdd.size, opt);
+    }
+    channelDeleteCommand(opt) {
+        this.cmd.channelDelete.set(this.cmd.reactionAdd.size, opt);
+    }
+    
 
     ready(opt) {
         this.client.on("ready", async () => {
