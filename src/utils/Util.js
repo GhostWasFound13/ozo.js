@@ -1,3 +1,5 @@
+const Discord = require("discord.js");
+
 class Util {
     static checkCondition(condition) {
         let cond = condition.replaceAll('&&', "#__AND__#")
@@ -114,34 +116,48 @@ class Util {
 
     static get channelTypes() {
         return {
-            Dm: "DM",
-            Text: "GUILD_TEXT",
-            Voice: "GUILD_VOICE",
-            News: "GUILD_NEWS",
-            Store: "GUILD_STORE",
-            Unknown: "UNKNOWN",
-            GroupDm: "GROUP_DM",
-            Stage: "GUILD_STAGE_VOICE",
-            Category: "GUILD_CATEGORY",
-            NewsThread: "GUILD_NEWS_THREAD",
-            PublicThread: "GUILD_PUBLIC_THREAD",
-            PrivateThread: "GUILD_PRIVATE_THREAD",
-        };
-    }
-    static get threadTypes() {
-        return {
-            public: "GUILD_PUBLIC_THREAD",
-            private: "GUILD_PRIVATE_THREAD",
+            Text: Discord.ChannelType.GuildText,
+            Voice: Discord.ChannelType.GuildVoice,
+            Category: Discord.ChannelType.GuildCategory,
+            DM: Discord.ChannelType.DM,
+            Announcement: Discord.ChannelType.GuildAnnouncement,
+            AnnouncementThread: Discord.ChannelType.AnnouncementThread,
+            PublicThread: Discord.ChannelType.PublicThread,
+            PrivateThread: Discord.ChannelType.PrivateThread,
+            Stage: Discord.ChannelType.GuildStageVoice,
+            Forum: Discord.ChannelType.GuildForum,
+            Media: Discord.ChannelType.GuildMedia,
+            GuildDirectory: Discord.ChannelType.GuildDirectory,
+            GroupDM: Discord.ChannelType.GroupDM
         };
     }
 
-    static async fetchMember(guild, id) {
-        return guild.members.fetch(id, { force: true }).catch((err) => undefined);
+    static get threadTypes() {
+        return {
+            public: Discord.ChannelType.PublicThread,
+            private: Discord.ChannelType.PrivateThread
+        };
     }
-    static async getMember(guild, id) {
+
+
+     static async fetchMembers(guild, options) {
+     return guild.members.fetch(options);
+    }
+
+    static getMember(guild, id) {
         let member = guild.members.cache.get(id);
         if (!member) member = this.fetchMember(guild, id);
         return member;
+    }
+
+    static getMembers(guild, options = { type: "startsWith", query: "", limit: 10 }, force = false) {
+        let members;
+        if (!force) {
+            members = guild.members.cache.filter((x) => x.user.username.toLowerCase()[options.type](options.query) || x.displayName?.toLowerCase()[options.type](options.query)).first(options.limit);
+        } else {
+            members = this.fetchMembers(guild, options);
+        }
+        return members;
     }
 
     static async fetchUser(d, userid) {
@@ -155,7 +171,11 @@ class Util {
     }
 
     static async fetchMessage(channel, id) {
-        return channel.messages.fetch(id, { force: true }).catch(e => { });
+        try {
+            return await channel.messages.fetch(id, { force: true });
+        } catch (err) {
+            return undefined;
+        }
     }
     static async getMessage(channel, id) {
         let message = await channel.messages.cache.get(id, { force: true });
@@ -164,13 +184,20 @@ class Util {
     }
 
     static async fetchChannel(d, id) {
-        const channel = await d.client.channels.fetch(id, { force: true }).catch(x => { })
-        return channel;
+        try {
+            return await d.client.channels.fetch(id, { force: true });
+        } catch (e) {
+            return undefined;
+        }
     }
-    static async getChannel(d, id) {
-        let channel = d.client.channels.cache.get(id)
-        if (!channel) channel = await this.fetchChannel(d, id)
-        return channel;
+
+    static getChannel(d, id, force = false) {
+        if (d.channel?.id === id) return d.channel;
+        else {
+            let channel = d.client.channels.cache.get(id);
+            if (!channel && force) channel = this.fetchChannel(d, id);
+            return channel;
+        }
     }
 
     static async fetchGuildChannel(guild, channelid) {
@@ -181,8 +208,7 @@ class Util {
         let channel = guild.channels.cache.get(channelid)
         if (!channel) channel = await this.fetchGuildChannel(guild, channelid)
         return channel;
-    }
-
+    } 
     static async fetchGuild(d, id) {
         const guild = await d.client.guilds.fetch(id, { force: true }).catch(x => { })
         return guild;
@@ -191,6 +217,82 @@ class Util {
         let guild = d.client.guilds.cache.get(id)
         if (!guild) guild = await this.fetchGuild(d, id)
         return guild;
+    }
+    static async getRole(guild, id) {
+        try {
+            let role = guild.roles.cache.get(id);
+            if (!role) role = await this.fetchRole(guild, id);
+            return role;
+        } catch (err) {
+            return undefined;
+        }
+    }
+    static async fetchRole(guild, id) {
+        try {
+            return await guild.roles.fetch(id, { force: true });
+        } catch (err) {
+            return undefined;
+        }
+    }
+
+    static getEmoji(d, Emoji) {
+        if (!Emoji) return;
+        if (Emoji.includes(":")) {
+            Emoji = Emoji.split(":")[2].split(">")[0];
+        }
+
+        const clientEmojis = d.client.emojis.cache.find((x) => x.name.toLowerCase().addBrackets() === Emoji.toLowerCase() || x.id === Emoji || x.toString() === Emoji);
+
+        if (clientEmojis) return clientEmojis;
+
+        const application = d.client.application;
+        const fetchEmojis = application.emojis.cache.size ? Promise.resolve() : application.emojis.fetch();
+
+        return fetchEmojis.then(() => {
+            const appEmojis = application.emojis.cache.find((x) => x.name.toLowerCase().addBrackets() === Emoji.toLowerCase() || x.id === Emoji || x.toString() === Emoji);
+
+            return appEmojis;
+        });
+    }
+    
+    static getSticker(guild, Sticker) {
+        return guild.stickers.cache.find((x) => x.name.toLowerCase() === Sticker.toLowerCase().addBrackets() || x.id === Sticker);
+    }
+
+    static findMember(guild, memberResolver) {
+        return guild.members.cache.findKey(
+            (x) =>
+                x.displayName.toLowerCase() === memberResolver.toLowerCase() ||
+                x.user.username.toLowerCase() === memberResolver.toLowerCase() ||
+                x.id === memberResolver ||
+                x.toString() === memberResolver
+        );
+    }
+
+    static findGuildChannel(guild, ChannelResolver) {
+        return guild.channels.cache.findKey((x) => x.name.toLowerCase() === ChannelResolver.toLowerCase() || x.id === ChannelResolver || x.toString() === ChannelResolver);
+    }
+
+    static findChannel(client, ChannelResolver) {
+        return client.channels.cache.findKey((x) => x.name.toLowerCase() === ChannelResolver.toLowerCase() || x.id === ChannelResolver || x.toString() === ChannelResolver);
+    }
+
+    static findRole(guild, RoleResolver) {
+        return guild.roles.cache.findKey((x) => x.name.toLowerCase() === RoleResolver.toLowerCase() || x.id === RoleResolver || x.toString() === RoleResolver);
+    }
+
+    static findUser(client, UserResolver) {
+        return client.users.cache.findKey(
+            (x) => x.username.toLowerCase() === UserResolver.toLowerCase() || x.tag.toLowerCase() === UserResolver.toLowerCase() || x.id === UserResolver || x.toString() === UserResolver
+        );
+    }
+
+    static findRoles(guild, options = { type: "startsWith", query: "", limit: 10 }) {
+        return guild.roles.cache
+            .filter((x) => {
+                return x.name.toLowerCase()[options.type](options.query.toLowerCase());
+            })
+            .first(options.limit);
     }
 }
 
